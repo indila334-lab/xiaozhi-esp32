@@ -7,6 +7,8 @@
 
 #define TAG "EmojiCollection"
 
+static const char* DEFAULT_NEUTRAL_REMOTE_URL = "https://raw.githubusercontent.com/indila334-lab/Mordashka/main/cube/neutral.png";
+
 void EmojiCollection::AddEmoji(const std::string& name, LvglImage* image, const std::string& url) {
     emoji_collection_[name] = image;
     if (!url.empty()) {
@@ -47,6 +49,12 @@ const LvglImage* EmojiCollection::GetEmojiImage(const char* name) {
             return remote;
         }
         ESP_LOGW(TAG, "Remote emoji failed, falling back to local emoji: %s", name);
+    } else if (std::string(name) == "neutral") {
+        auto remote = GetRemoteEmojiImage(name, DEFAULT_NEUTRAL_REMOTE_URL);
+        if (remote != nullptr) {
+            return remote;
+        }
+        ESP_LOGW(TAG, "Default neutral remote emoji failed, falling back to local emoji");
     }
 
     auto it = emoji_collection_.find(name);
