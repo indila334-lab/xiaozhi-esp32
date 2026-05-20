@@ -13,12 +13,15 @@
 // Define interface for emoji collection
 class EmojiCollection {
 public:
-    virtual void AddEmoji(const std::string& name, LvglImage* image);
+    virtual void AddEmoji(const std::string& name, LvglImage* image, const std::string& url = "");
+    virtual void SetEmojiUrl(const std::string& name, const std::string& url);
     virtual const LvglImage* GetEmojiImage(const char* name);
+    virtual const std::string* GetEmojiUrl(const char* name);
     virtual ~EmojiCollection();
 
 private:
     std::map<std::string, LvglImage*> emoji_collection_;
+    std::map<std::string, std::string> emoji_url_collection_;
 };
 
 class Twemoji32 : public EmojiCollection {
