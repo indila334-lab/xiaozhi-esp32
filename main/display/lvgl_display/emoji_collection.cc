@@ -6,8 +6,19 @@
 
 #define TAG "EmojiCollection"
 
-void EmojiCollection::AddEmoji(const std::string& name, LvglImage* image) {
+void EmojiCollection::AddEmoji(const std::string& name, LvglImage* image, const std::string& url) {
     emoji_collection_[name] = image;
+    if (!url.empty()) {
+        emoji_url_collection_[name] = url;
+    }
+}
+
+void EmojiCollection::SetEmojiUrl(const std::string& name, const std::string& url) {
+    if (url.empty()) {
+        emoji_url_collection_.erase(name);
+        return;
+    }
+    emoji_url_collection_[name] = url;
 }
 
 const LvglImage* EmojiCollection::GetEmojiImage(const char* name) {
@@ -17,6 +28,15 @@ const LvglImage* EmojiCollection::GetEmojiImage(const char* name) {
     }
 
     ESP_LOGW(TAG, "Emoji not found: %s", name);
+    return nullptr;
+}
+
+const std::string* EmojiCollection::GetEmojiUrl(const char* name) {
+    auto it = emoji_url_collection_.find(name);
+    if (it != emoji_url_collection_.end()) {
+        return &it->second;
+    }
+
     return nullptr;
 }
 
