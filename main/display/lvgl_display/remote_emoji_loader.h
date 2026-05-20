@@ -6,6 +6,7 @@
 
 #include <esp_heap_caps.h>
 #include <esp_log.h>
+#include <cstdint>
 #include <memory>
 #include <stdexcept>
 #include <string>
