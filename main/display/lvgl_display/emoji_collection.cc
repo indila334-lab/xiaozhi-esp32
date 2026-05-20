@@ -1,4 +1,5 @@
 #include "emoji_collection.h"
+#include "remote_emoji_loader.h"
 
 #include <esp_log.h>
 #include <unordered_map>
@@ -14,6 +15,7 @@ void EmojiCollection::AddEmoji(const std::string& name, LvglImage* image, const 
 }
 
 void EmojiCollection::SetEmojiUrl(const std::string& name, const std::string& url) {
+    remote_emoji_cache_.erase(name);
     if (url.empty()) {
         emoji_url_collection_.erase(name);
         return;
@@ -21,7 +23,32 @@ void EmojiCollection::SetEmojiUrl(const std::string& name, const std::string& ur
     emoji_url_collection_[name] = url;
 }
 
+const LvglImage* EmojiCollection::GetRemoteEmojiImage(const std::string& name, const std::string& url) {
+    auto cached = remote_emoji_cache_.find(name);
+    if (cached != remote_emoji_cache_.end()) {
+        return cached->second.get();
+    }
+
+    auto image = RemoteEmojiLoader::Load(url);
+    if (image == nullptr) {
+        return nullptr;
+    }
+
+    auto* raw = image.get();
+    remote_emoji_cache_[name] = std::move(image);
+    return raw;
+}
+
 const LvglImage* EmojiCollection::GetEmojiImage(const char* name) {
+    auto url = GetEmojiUrl(name);
+    if (url != nullptr) {
+        auto remote = GetRemoteEmojiImage(name, *url);
+        if (remote != nullptr) {
+            return remote;
+        }
+        ESP_LOGW(TAG, "Remote emoji failed, falling back to local emoji: %s", name);
+    }
+
     auto it = emoji_collection_.find(name);
     if (it != emoji_collection_.end()) {
         return it->second;
@@ -41,6 +68,7 @@ const std::string* EmojiCollection::GetEmojiUrl(const char* name) {
 }
 
 EmojiCollection::~EmojiCollection() {
+    remote_emoji_cache_.clear();
     for (auto it = emoji_collection_.begin(); it != emoji_collection_.end(); ++it) {
         delete it->second;
     }
