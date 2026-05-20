@@ -268,7 +268,11 @@ bool Assets::LvglStrategy::Apply(Assets* assets, bool refresh_display_theme) {
             if (cJSON_IsObject(emoji)) {
                 cJSON* name = cJSON_GetObjectItem(emoji, "name");
                 cJSON* file = cJSON_GetObjectItem(emoji, "file");
+                cJSON* url = cJSON_GetObjectItem(emoji, "url");
                 cJSON* eaf = cJSON_GetObjectItem(emoji, "eaf");
+                if (cJSON_IsString(name) && cJSON_IsString(url)) {
+                    custom_emoji_collection->SetEmojiUrl(name->valuestring, url->valuestring);
+                }
                 if (cJSON_IsString(name) && cJSON_IsString(file) && (NULL== eaf)) {
                     if (!assets->GetAssetData(file->valuestring, ptr, size)) {
                         ESP_LOGE(TAG, "Emoji %s image file %s is not found", name->valuestring, file->valuestring);
