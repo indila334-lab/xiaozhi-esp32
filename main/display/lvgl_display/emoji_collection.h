@@ -20,8 +20,11 @@ public:
     virtual ~EmojiCollection();
 
 private:
+    const LvglImage* GetRemoteEmojiImage(const std::string& name, const std::string& url);
+
     std::map<std::string, LvglImage*> emoji_collection_;
     std::map<std::string, std::string> emoji_url_collection_;
+    std::map<std::string, std::unique_ptr<LvglImage>> remote_emoji_cache_;
 };
 
 class Twemoji32 : public EmojiCollection {
