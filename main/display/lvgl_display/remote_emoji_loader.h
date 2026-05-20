@@ -16,6 +16,8 @@
 class RemoteEmojiLoader {
 public:
     static std::unique_ptr<LvglImage> Load(const std::string& url) {
+        ESP_LOGI(REMOTE_EMOJI_LOADER_TAG, "Remote emoji download start: %s", url.c_str());
+
         auto network = Board::GetInstance().GetNetwork();
         if (network == nullptr) {
             ESP_LOGW(REMOTE_EMOJI_LOADER_TAG, "Network is not available");
@@ -40,6 +42,7 @@ public:
         }
 
         size_t content_length = http->GetBodyLength();
+        ESP_LOGI(REMOTE_EMOJI_LOADER_TAG, "Remote emoji content length: %u", static_cast<unsigned>(content_length));
         if (content_length == 0 || content_length > MAX_REMOTE_EMOJI_BYTES) {
             ESP_LOGW(REMOTE_EMOJI_LOADER_TAG, "Rejected remote emoji size: %u", static_cast<unsigned>(content_length));
             http->Close();
@@ -48,6 +51,7 @@ public:
 
         void* data = heap_caps_malloc(content_length, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
         if (data == nullptr) {
+            ESP_LOGI(REMOTE_EMOJI_LOADER_TAG, "PSRAM allocation failed, trying internal RAM");
             data = heap_caps_malloc(content_length, MALLOC_CAP_8BIT);
         }
         if (data == nullptr) {
@@ -80,7 +84,9 @@ public:
         }
 
         try {
-            return std::make_unique<LvglAllocatedImage>(data, content_length);
+            auto image = std::make_unique<LvglAllocatedImage>(data, content_length);
+            ESP_LOGI(REMOTE_EMOJI_LOADER_TAG, "Remote emoji decoded successfully: %u bytes", static_cast<unsigned>(content_length));
+            return image;
         } catch (const std::exception& e) {
             ESP_LOGW(REMOTE_EMOJI_LOADER_TAG, "Decode failed: %s", e.what());
             heap_caps_free(data);
