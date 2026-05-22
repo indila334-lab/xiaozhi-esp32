@@ -18,3 +18,11 @@ main/mmap_generate_emoji.h
 *.bin
 mmap_generate_*.h
 .clangd
+
+# Severin local bridge secrets
+.env
+*.env
+
+# local env files
+.env
+*.env
