@@ -76,3 +76,6 @@ CONFIG_LV_USE_WIN=n
 CONFIG_LV_BUILD_EXAMPLES=n
 CONFIG_LV_BUILD_DEMOS=n
 
+
+# Severin local OTA endpoint
+CONFIG_OTA_URL="http://192.168.0.101:8787/xiaozhi/ota/"
